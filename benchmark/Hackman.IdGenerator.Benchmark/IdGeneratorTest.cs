@@ -15,5 +15,5 @@ public class IdGeneratorTest
     public long IdGenerator() => idGenerator.NextId();
 
     [Benchmark]
-    public Guid NewGuid() => Guid.NewGuid();
+    public string NewGuid() => Guid.NewGuid().ToString();
 }
