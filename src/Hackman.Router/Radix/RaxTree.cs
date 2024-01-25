@@ -26,7 +26,7 @@ namespace Hackman.Router.Radix
 
     public class Tree<T>
     {
-        public Node<T> Root = new Node<T>() { Value = new List<T>(), Children = new List<Node<T>>() };
+        public Node<T> Root = new Node<T>() { Value = new List<T>(), Children = new List<Node<T>>(), Path = string.Empty };
 
         public StringComparison Comparison = StringComparison.Ordinal;
 
@@ -37,7 +37,7 @@ namespace Hackman.Router.Radix
 
         public (int index, Node<T> node, int nodePathLength) FindCommonPrexNode(string path, Node<T> node, int index)
         {
-            if (node.Path == null || node.Path.Length == 0) { return (index, node, 0); }
+            if ((node.Path == null || node.Path.Length == 0) && node != Root) { return (index, node, 0); }
             var p = node.Path;
             int i = 1;
             for (; i <= p.Length; i++)
@@ -48,10 +48,10 @@ namespace Hackman.Router.Radix
                 }
                 else
                 {
-                    return (index, node, i);
+                    return (index, node, i - 1);
                 }
             }
-            if (node.Children == null || node.Children.Count == 0) { return (index, node, i); }
+            if (node.Children == null || node.Children.Count == 0) { return (index, node, p.Length); }
             foreach (var item in node.Children)
             {
                 var (xp, xn, xpi) = FindCommonPrexNode(path, item, index);
@@ -60,7 +60,7 @@ namespace Hackman.Router.Radix
                     return (xp, xn, xpi);
                 }
             }
-            return (index, node, i);
+            return (index, node, p.Length);
         }
 
         public void Insert(string path, T value)

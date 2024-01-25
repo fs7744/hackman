@@ -5,3 +5,4 @@
 //Console.WriteLine(a.DictionarySearch());
 //Console.WriteLine(a.ArtTreeSearch());
 //Console.WriteLine(a.AdaptiveRadixTreeTest());
+Console.WriteLine(1);
