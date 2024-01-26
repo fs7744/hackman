@@ -107,5 +107,50 @@ namespace Hackman.Router.Radix
                 }
             }
         }
+
+
+    }
+
+    public class DFSNode<T> : IDisposable
+    {
+        public string Path;
+
+        public T[] Value;
+
+        public DFSNode<T>[] Children;
+
+        public DFSNode<T> ValueParent;
+
+        public void Dispose()
+        {
+            ValueParent = null;
+            if (Children != null)
+            {
+                foreach (var item in Children)
+                {
+                    item.Dispose();
+                }
+            }
+            Children = null;
+        }
+    }
+
+    public class DFSTree<T>
+    {
+        public DFSNode<T> Root;
+
+        public StringComparison Comparison;
+
+        public void Search(string path)
+        {
+            int index = 0;
+            foreach (var item in Root.Children)
+            {
+                if (StringHelper.Equals(path, index, item.Path, 0, item.Path.Length, Comparison))
+                {
+                    index += item.Path.Length;
+                }
+            }
+        }
     }
 }
