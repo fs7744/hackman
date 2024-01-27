@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.CompilerServices;
 
 namespace Hackman.Router.Radix
@@ -108,7 +109,38 @@ namespace Hackman.Router.Radix
             }
         }
 
+        public DFSTree<T> BuildDFSTree()
+        {
+            var tree = new DFSTree<T>()
+            {
+                Comparison = Comparison,
+                Root = new DFSNode<T>() { Path = Root.Path, Value = Root.Value?.ToArray() }
+            };
+            tree.Root.Children = BuildDFSTreeChildren(Root, null);
+            return tree;
+        }
 
+        private DFSNode<T>[] BuildDFSTreeChildren(Node<T> node, DFSNode<T> valueParent)
+        {
+            if (node.Children == null || node.Children.Count == 0)
+            {
+                return null;
+            }
+            else
+            {
+                return node.Children.Select(i =>
+                {
+                    var r = new DFSNode<T>
+                    {
+                        Path = i.Path,
+                        ValueParent = valueParent,
+                        Value = i.Value?.ToArray(),
+                    };
+                    r.Children = BuildDFSTreeChildren(i, r.Value != null && r.Value.Length > 0 ? r : valueParent);
+                    return r;
+                }).ToArray();
+            }
+        }
     }
 
     public class DFSNode<T> : IDisposable
@@ -141,16 +173,26 @@ namespace Hackman.Router.Radix
 
         public StringComparison Comparison;
 
-        public void Search(string path)
+        public DFSNode<T> Search(string path)
         {
-            int index = 0;
+            var r = SearchChildren(path, Root, 0);
+            return r.Value == null ? (r.ValueParent != null ? r.ValueParent : null) : r;
+        }
+
+        private DFSNode<T> SearchChildren(string path, DFSNode<T> node, int index)
+        {
+            if (node.Children == null || node.Children.Length == 0)
+            {
+                return node;
+            }
             foreach (var item in Root.Children)
             {
                 if (StringHelper.Equals(path, index, item.Path, 0, item.Path.Length, Comparison))
                 {
-                    index += item.Path.Length;
+                    return SearchChildren(path, item, index + item.Path.Length);
                 }
             }
+            return node;
         }
     }
 }
