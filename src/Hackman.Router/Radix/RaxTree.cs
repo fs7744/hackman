@@ -33,6 +33,15 @@ namespace Hackman.Router.Radix
             Value.Add(value);
             HasValue = true;
         }
+
+        public void AddChildren(Node<T> value)
+        {
+            if (Children == null)
+            {
+                Children = new List<Node<T>>();
+            }
+            Children.Add(value);
+        }
     }
 
     public class Tree<T>
@@ -83,16 +92,29 @@ namespace Hackman.Router.Radix
             {
                 var n = new Node<T>() { Path = path };
                 n.AddValue(value);
-                node.Children.Add(n);
+                node.AddChildren(n);
             }
             else if (nodePathLength == node.Path.Length)
             {
-                node.AddValue(value);
+                if (index == path.Length - 1)
+                {
+                    node.AddValue(value);
+                }
+                else
+                {
+                    var n = new Node<T>()
+                    {
+                        Path = path.Substring(index + 1)
+                    };
+                    n.AddValue(value);
+                    node.AddChildren(n);
+                }
+
             }
             else
             {
                 var newNode = new Node<T>() { Path = node.Path.Substring(nodePathLength), Children = node.Children, Value = node.Value, HasValue = node.HasValue };
-                node.Children = new List<Node<T>> { newNode };
+                node.AddChildren(newNode);
                 node.Path = node.Path.Substring(0, nodePathLength);
                 node.Value = null;
                 node.HasValue = false;
@@ -104,7 +126,7 @@ namespace Hackman.Router.Radix
                 {
                     var n = new Node<T>() { Path = path.Substring(index + 1) };
                     n.AddValue(value);
-                    node.Children.Add(n);
+                    node.AddChildren(n);
                 }
             }
         }
@@ -185,7 +207,7 @@ namespace Hackman.Router.Radix
             {
                 return node;
             }
-            foreach (var item in Root.Children)
+            foreach (var item in node.Children)
             {
                 if (StringHelper.Equals(path, index, item.Path, 0, item.Path.Length, Comparison))
                 {

@@ -1,5 +1,7 @@
 ﻿// See https://aka.ms/new-console-template for more information
-//var summary = BenchmarkRunner.Run<ARTTest>();
+using BenchmarkDotNet.Running;
+
+var summary = BenchmarkRunner.Run<DFSTreeTest>();
 
 //var a = new ARTTest();
 //Console.WriteLine(a.DictionarySearch());

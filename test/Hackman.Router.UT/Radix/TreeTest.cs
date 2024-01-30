@@ -121,6 +121,42 @@ namespace Hackman.Router.UT.Radix
             Assert.Single(tree.Root.Children.First().Children);
             Assert.Equal("a", tree.Root.Children.First().Children.First().Path);
         }
+
+        [Fact]
+        public void Three_InsertTest()
+        {
+            var tree = new Tree<string>();
+            tree.Insert("/a", "/a");
+            tree.Insert("/b", "/b");
+            tree.Insert("/bb", "/bb");
+            Assert.False(tree.Root.HasValue);
+            Assert.Null(tree.Root.Value);
+            Assert.Single(tree.Root.Children);
+            Assert.Equal("/", tree.Root.Children.First().Path);
+            Assert.Equal(2, tree.Root.Children.First().Children.Count);
+            Assert.Equal("a", tree.Root.Children.First().Children.First().Path);
+            Assert.Equal("b", tree.Root.Children.First().Children.Last().Path);
+            Assert.True(tree.Root.Children.First().Children.Last().HasValue);
+            Assert.Single(tree.Root.Children.First().Children.Last().Children);
+            Assert.Equal("b", tree.Root.Children.First().Children.Last().Children.First().Path);
+        }
         #endregion
+    }
+
+    public class DFSTreeTest
+    {
+
+        [Fact]
+        public void SearchChildrenTest()
+        {
+            var tree = new Tree<string>();
+            tree.Insert("/a", "/a");
+            tree.Insert("/b", "/b");
+            tree.Insert("/bb", "/bb");
+            var d = tree.BuildDFSTree();
+            var n = d.Search("/bbb");
+            Assert.Single(n.Value);
+            Assert.Equal("/bb", n.Value.First());
+        }
     }
 }
