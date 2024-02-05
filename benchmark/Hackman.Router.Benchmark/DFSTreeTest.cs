@@ -3,14 +3,16 @@ using BenchmarkDotNet.Attributes;
 using DotNext.Runtime.Caching;
 using Hackman.Router.Radix;
 using System.Collections.Concurrent;
+using System.Collections.Frozen;
 
 [AllStatisticsColumn]
 public class DFSTreeTest
 {
-    private readonly DFSTree<string> dfs;
+    private readonly DFSTree<List<string>> dfs;
     private readonly Dictionary<string, string> dict;
+    private readonly FrozenDictionary<string, string> frozenDict;
     private readonly ConcurrentDictionary<string, string> concurrentdict;
-    private readonly ConcurrentCache<string, DFSNode<string>> cache;
+    private readonly ConcurrentCache<string, DFSNode<List<string>>> cache;
 
     public DFSTreeTest()
     {
@@ -19,13 +21,14 @@ public class DFSTreeTest
         tree.Insert("/b", "/b");
         tree.Insert("/bb", "/bb");
         tree.Insert("/ab", "/ab");
-        dfs = tree.BuildDFSTree();
+        dfs = tree.BuildDFSTree(i => i);
 
         dict = new Dictionary<string, string>();
         dict.Add("/a", "/a");
         dict.Add("/b", "/b");
         dict.Add("/bb", "/bb");
         dict.Add("/ab", "/ab");
+        frozenDict = dict.ToFrozenDictionary();
 
         concurrentdict = new System.Collections.Concurrent.ConcurrentDictionary<string, string>();
         concurrentdict.TryAdd("/a", "/a");
@@ -33,7 +36,7 @@ public class DFSTreeTest
         concurrentdict.TryAdd("/bb", "/bb");
         concurrentdict.TryAdd("/ab", "/ab");
 
-        cache = new ConcurrentCache<string, DFSNode<string>>(10, CacheEvictionPolicy.LRU);
+        cache = new ConcurrentCache<string, DFSNode<List<string>>>(10, CacheEvictionPolicy.LRU);
     }
 
     [Benchmark]
@@ -57,6 +60,12 @@ public class DFSTreeTest
     public void DictGetChildren()
     {
         dict.TryGetValue("/bbb", out var a);
+    }
+
+    [Benchmark]
+    public void FrozenDictionaryGetChildren()
+    {
+        frozenDict.TryGetValue("/bbb", out var a);
     }
 
     [Benchmark]

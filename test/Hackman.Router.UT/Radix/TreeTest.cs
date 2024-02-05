@@ -153,7 +153,7 @@ namespace Hackman.Router.UT.Radix
             tree.Insert("/a", "/a");
             tree.Insert("/b", "/b");
             tree.Insert("/bb", "/bb");
-            var d = tree.BuildDFSTree();
+            var d = tree.BuildDFSTree(i => i);
             var n = d.Search("/bbb");
             Assert.Single(n.Value);
             Assert.Equal("/bb", n.Value.First());

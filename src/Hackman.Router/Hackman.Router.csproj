@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
@@ -8,6 +8,10 @@
     <Compile Remove="Tree\**" />
     <EmbeddedResource Remove="Tree\**" />
     <None Remove="Tree\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="DotNext" Version="5.0.1" />
   </ItemGroup>
 
 </Project>

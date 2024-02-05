@@ -131,18 +131,18 @@ namespace Hackman.Router.Radix
             }
         }
 
-        public DFSTree<T> BuildDFSTree()
+        public DFSTree<R> BuildDFSTree<R>(Func<List<T>, R> convert)
         {
-            var tree = new DFSTree<T>()
+            var tree = new DFSTree<R>()
             {
                 Comparison = Comparison,
-                Root = new DFSNode<T>() { Path = Root.Path, Value = Root.Value?.ToArray() }
+                Root = new DFSNode<R>() { Path = Root.Path, Value = convert(Root.Value) }
             };
-            tree.Root.Children = BuildDFSTreeChildren(Root, null);
+            tree.Root.Children = BuildDFSTreeChildren<R>(Root, null, convert);
             return tree;
         }
 
-        private DFSNode<T>[] BuildDFSTreeChildren(Node<T> node, DFSNode<T> valueParent)
+        private DFSNode<R>[] BuildDFSTreeChildren<R>(Node<T> node, DFSNode<R> valueParent, Func<List<T>, R> convert)
         {
             if (node.Children == null || node.Children.Count == 0)
             {
@@ -152,13 +152,13 @@ namespace Hackman.Router.Radix
             {
                 return node.Children.Select(i =>
                 {
-                    var r = new DFSNode<T>
+                    var r = new DFSNode<R>
                     {
                         Path = i.Path,
                         ValueParent = valueParent,
-                        Value = i.Value?.ToArray(),
+                        Value = convert(i.Value),
                     };
-                    r.Children = BuildDFSTreeChildren(i, r.Value != null && r.Value.Length > 0 ? r : valueParent);
+                    r.Children = BuildDFSTreeChildren(i, r.Value != null ? r : valueParent, convert);
                     return r;
                 }).ToArray();
             }
@@ -169,7 +169,7 @@ namespace Hackman.Router.Radix
     {
         public string Path;
 
-        public T[] Value;
+        public T Value;
 
         public DFSNode<T>[] Children;
 
