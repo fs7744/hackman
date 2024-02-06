@@ -69,9 +69,9 @@ namespace Hackman.Router
             }
         }
 
-        public PriorityPathRouter Build()
+        public (FrozenDictionary<string, MatchRouter>, DFSTree<MatchRouter>) CreateData()
         {
-            var e = exact.ToFrozenDictionary(i => i.Key, i =>
+            return (exact.ToFrozenDictionary(i => i.Key, i =>
             {
                 MatchRouter router = (c) => null;
                 foreach (var item in i.Value.OrderByDescending(j => j.Order))
@@ -83,8 +83,8 @@ namespace Hackman.Router
                     }
                 }
                 return router;
-            }, comparison == StringComparison.OrdinalIgnoreCase ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal);
-            var t = tree.BuildDFSTree<MatchRouter>(i =>
+            }, comparison == StringComparison.OrdinalIgnoreCase ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal)
+            , tree.BuildDFSTree<MatchRouter>(i =>
             {
                 MatchRouter router = (c) => null;
                 foreach (var item in i.OrderByDescending(j => j.Order))
@@ -96,7 +96,12 @@ namespace Hackman.Router
                     }
                 }
                 return router;
-            });
+            }));
+        }
+
+        public PriorityPathRouter Build()
+        {
+            var (e, t) = CreateData();
             return new PriorityPathRouter(e, t, comparison, CacheCapacity, CacheEvictionPolicy);
         }
     }

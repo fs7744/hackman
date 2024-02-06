@@ -1,8 +1,4 @@
-﻿using BenchmarkDotNet.Attributes;
-using Hackman.Router.Radix;
-using System.Collections.Frozen;
-
-namespace Hackman.Router.Benchmark
+﻿namespace Hackman.Router.UT
 {
     public class TestPriorityPathRouterMetadata : IPriorityRouterMetadata
     {
@@ -33,49 +29,13 @@ namespace Hackman.Router.Benchmark
         public string Path { get; set; }
     }
 
-    public class NoCachePriorityPathRouter
+    public class PriorityPathRouterBuilderTest
     {
-        private readonly FrozenDictionary<string, MatchRouter> e;
-        private readonly DFSTree<MatchRouter> t;
-
-        public NoCachePriorityPathRouter(FrozenDictionary<string, MatchRouter> e, DFSTree<MatchRouter> t)
-        {
-            this.e = e;
-            this.t = t;
-        }
-
-        public IPriorityRouterMetadata Match(IRoutingContext context)
-        {
-            if (e.TryGetValue(context.Path, out var router))
-            {
-                return router(context);
-            }
-
-            var n = t.Search(context.Path);
-            while (n != null)
-            {
-                var r = n.Value?.Invoke(context);
-                if (r != null)
-                    return r;
-                n = n.ValueParent;
-            }
-            return null;
-        }
-    }
-
-    [AllStatisticsColumn]
-    public class RouterTest
-    {
-        PriorityPathRouter priorityPathRouter;
-        NoCachePriorityPathRouter noCachePriorityPathRouter;
-        public RouterTest()
+        [Fact]
+        public void BuildTest()
         {
             var b = new PriorityPathRouterBuilder();
 
-            b.Add(new TestPriorityPathRouterMetadata(0, "/a", PathMatch.Prefix, (next, m) => (c) => m));
-            b.Add(new TestPriorityPathRouterMetadata(0, "/b", PathMatch.Prefix, (next, m) => (c) => m));
-            b.Add(new TestPriorityPathRouterMetadata(0, "/bb", PathMatch.Prefix, (next, m) => (c) => m));
-            b.Add(new TestPriorityPathRouterMetadata(0, "/ab", PathMatch.Prefix, (next, m) => (c) => m));
             b.Add(new TestPriorityPathRouterMetadata(0, "/a/dsd/csd", PathMatch.Exact, (next, m) => (c) => m));
             b.Add(new TestPriorityPathRouterMetadata(1, "/a/dsd/csd", PathMatch.Exact, (next, m) => (c) => m));
             b.Add(new TestPriorityPathRouterMetadata(0, "/aaa/bbb/", PathMatch.Prefix, (next, m) => (c) => m));
@@ -90,21 +50,7 @@ namespace Hackman.Router.Benchmark
             b.Add(new TestPriorityPathRouterMetadata(0, "/aaa/ccffcc/", PathMatch.Prefix, (next, m) => (c) => m));
             b.Add(new TestPriorityPathRouterMetadata(0, "/aaa/bbggb/", PathMatch.Prefix, (next, m) => (c) => m));
             b.Add(new TestPriorityPathRouterMetadata(0, "/aaa/ccddcc/", PathMatch.Prefix, (next, m) => (c) => m));
-            priorityPathRouter = b.Build();
-            var (e, t) = b.CreateData();
-            noCachePriorityPathRouter = new NoCachePriorityPathRouter(e, t);
-        }
-
-        [Benchmark]
-        public void PriorityPathRouterGet()
-        {
-            priorityPathRouter.Match(new TestRoutingContext() { Path = "/aaa/ccddcc/ddsds" });
-        }
-
-        [Benchmark]
-        public void NoCachePriorityPathRouterGet()
-        {
-            noCachePriorityPathRouter.Match(new TestRoutingContext() { Path = "/aaa/ccddcc/ddsds" });
+            var priorityPathRouter = b.Build();
         }
     }
 }

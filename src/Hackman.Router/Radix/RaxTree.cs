@@ -114,7 +114,7 @@ namespace Hackman.Router.Radix
             else
             {
                 var newNode = new Node<T>() { Path = node.Path.Substring(nodePathLength), Children = node.Children, Value = node.Value, HasValue = node.HasValue };
-                node.AddChildren(newNode);
+                node.Children = new List<Node<T>> { newNode };
                 node.Path = node.Path.Substring(0, nodePathLength);
                 node.Value = null;
                 node.HasValue = false;
@@ -136,7 +136,7 @@ namespace Hackman.Router.Radix
             var tree = new DFSTree<R>()
             {
                 Comparison = Comparison,
-                Root = new DFSNode<R>() { Path = Root.Path, Value = convert(Root.Value) }
+                Root = new DFSNode<R>() { Path = Root.Path, Value = Root.Value != null ? convert(Root.Value) : default }
             };
             tree.Root.Children = BuildDFSTreeChildren<R>(Root, null, convert);
             return tree;
@@ -156,7 +156,7 @@ namespace Hackman.Router.Radix
                     {
                         Path = i.Path,
                         ValueParent = valueParent,
-                        Value = convert(i.Value),
+                        Value = i.Value == null ? default : convert(i.Value),
                     };
                     r.Children = BuildDFSTreeChildren(i, r.Value != null ? r : valueParent, convert);
                     return r;
